@@ -40,25 +40,30 @@ class ImageFile:
     def close (self):
         del self.image
 
-if raw_input('copy from sd card? y or n') == 'y':
-    for file in os.listdir(_PATH1_):
-        transitingFile = TransitingFile(os.path.join(_PATH1_, file))
-        directory = os.path.join(_PATH1_, transitingFile.timestring[:-2])
-        transitingFile.copyTo(directory)
+def main():
+    if raw_input('copy from sd card? y or n') == 'y':
+        for file in os.listdir(_PATH1_):
+            transitingFile = TransitingFile(os.path.join(_PATH1_, file))
+            directory = os.path.join(_PATH1_, transitingFile.timestring[:-2])
+            transitingFile.copyTo(directory)
 
-if raw_input('copy from photos_nikon to google drive? y or n') == 'y':
-    for root, dirs, files in os.walk(_PATH2_):
-        for file in files:
-            if file[-3:] != 'JPG': # only do jpg files
-                continue
-            YYYYMM = os.path.split(root)[-1][:6] # expecting YYYYMM
-            YYYYMMDD = os.path.split(root)[-1][:8] # expecting YYYYMMDD
-            directory = os.path.join(_PATH3_, YYYYMM) 
-            # ImageFile should just open, resize & save as.
-            existingImageFilePath = os.path.join(root, file)
-            newImageFilePath = os.path.join(directory, YYYYMMDD+'_'+file)
-            image = ImageFile(existingImageFilePath)
-            image.open()
-            image.resize(1200)
-            image.write(newImageFilePath)
-            image.close()
+    if raw_input('copy from photos_nikon to google drive? y or n') == 'y':
+        for root, dirs, files in os.walk(_PATH2_):
+            for file in files:
+                if file[-3:] != 'JPG': # only do jpg files
+                    continue
+                YYYYMM = os.path.split(root)[-1][:6] # expecting YYYYMM
+                YYYYMMDD = os.path.split(root)[-1][:8] # expecting YYYYMMDD
+                directory = os.path.join(_PATH3_, YYYYMM) 
+                if not (os.path.exists(directory)):
+                    print 'main mkdir:', directory
+                    os.makedirs(directory)
+                # ImageFile should just open, resize & save as.
+                existingImageFilePath = os.path.join(root, file)
+                newImageFilePath = os.path.join(directory, YYYYMMDD+'_'+file)
+                image = ImageFile(existingImageFilePath)
+                image.open()
+                image.resize(1200)
+                image.write(newImageFilePath)
+                image.close()
+main()
