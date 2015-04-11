@@ -13,7 +13,6 @@ class TransitingFile:
         self.file = os.path.basename(file) 
         self.filename = file 
         self.timestring = time.strftime('%Y%m%d', time.gmtime(os.path.getctime(self.filename))) # YYYYMMDD
-
     def copyTo (self, directory, pre=None):
         file = self.file if pre == None else pre + self.file
         newfilename = os.path.join(directory, file)
@@ -23,6 +22,9 @@ class TransitingFile:
         shutil.copyfile(self.filename, newfilename)
         self.newfilename = newfilename
         print 'TransitingFile copyTo:', self.newfilename
+    def write (self, filepath):
+        shutil.copyfile(self.filename, filepath)
+        print 'TransitingFile write:', filepath
 
 class ImageFile:
     def __init__ (self, file):
@@ -39,6 +41,17 @@ class ImageFile:
         print 'ImageFile writing:', path
     def close (self):
         del self.image
+
+class ImageFilePair:
+    def __init__ (self):
+        self.left = None
+        self.right = None
+    def setLeft (self, key, file):
+        self.left = key
+        self.leftfile = file
+    def setRight (self, key, file):
+        self.right = key
+        self.rightfile = file
 
 def main():
     if raw_input('copy from sd card? y or n') == 'y':
@@ -66,4 +79,32 @@ def main():
                 image.resize(1200)
                 image.write(newImageFilePath)
                 image.close()
+    if raw_input('sync from photos_nikon to google drive? y or n') == 'y':
+        ImageFilePairs = []
+        for root, dirs, files in os.walk(_PATH2_):
+            for file in files:
+                if file[-3:] != 'JPG': # only do jpg files
+                    continue
+                YYYYMMDD = os.path.split(root)[-1][:8] # expecting YYYYMMDD
+                ifp = ImageFilePair()
+                ifp.left = YYYYMMDD+'_'+file
+                ifp.leftfile = os.path.join(root, file)
+                ImageFilePairs.append(ifp)
+        for root, dirs, files in os.walk(_PATH3_):
+            for file in files:
+                if file[-3:] != 'JPG': # only do jpg files
+                    continue
+                match = next((x for x in ImageFilePairs if x.left == file), None)
+                if match:
+                    match.right = file
+                    match.rightfile = os.path.join(root, file)
+        for ifp in ImageFilePairs:
+            if ifp.left and ifp.right:
+                if os.path.getmtime(ifp.leftfile) > os.path.getmtime(ifp.rightfile):
+                    #TransitingFile(ifp.leftfile).write(ifp.rightfile)
+                    image = ImageFile(ifp.leftfile)
+                    image.open()
+                    image.resize(1200)
+                    image.write(ifp.rightfile)
+                    image.close()
 main()
