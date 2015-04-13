@@ -57,9 +57,8 @@ def main():
     if raw_input('copy from sd card? y or n') == 'y':
         for file in os.listdir(_PATH1_):
             transitingFile = TransitingFile(os.path.join(_PATH1_, file))
-            directory = os.path.join(_PATH1_, transitingFile.timestring[:-2])
+            directory = os.path.join(_PATH2_, transitingFile.timestring[:8])
             transitingFile.copyTo(directory)
-
     if raw_input('copy from photos_nikon to google drive? y or n') == 'y':
         for root, dirs, files in os.walk(_PATH2_):
             for file in files:
@@ -71,15 +70,16 @@ def main():
                 if not (os.path.exists(directory)):
                     print 'main mkdir:', directory
                     os.makedirs(directory)
-                # ImageFile should just open, resize & save as.
-                existingImageFilePath = os.path.join(root, file)
                 newImageFilePath = os.path.join(directory, YYYYMMDD+'_'+file)
-                image = ImageFile(existingImageFilePath)
-                image.open()
-                image.resize(1200)
-                image.write(newImageFilePath)
-                image.close()
-    if raw_input('sync from photos_nikon to google drive? y or n') == 'y':
+                if not (os.path.exists(newImageFilePath)):
+                    # ImageFile should just open, resize & save as.
+                    existingImageFilePath = os.path.join(root, file)
+                    image = ImageFile(existingImageFilePath)
+                    image.open()
+                    image.resize(1200)
+                    image.write(newImageFilePath)
+                    image.close()
+    if raw_input('sync edits from photos_nikon to google drive? y or n') == 'y':
         ImageFilePairs = []
         for root, dirs, files in os.walk(_PATH2_):
             for file in files:
