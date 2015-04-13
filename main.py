@@ -4,6 +4,18 @@ import shutil
 import datetime
 # PILLOW MODULES
 from PIL import Image
+import PySide
+import sys
+
+#from __future__ import (print_function, division, unicode_literals,
+#                        absolute_import)
+
+from PySide.QtCore import Slot, QMetaObject
+from PySide.QtUiTools import QUiLoader
+from PySide.QtGui import QApplication, QMainWindow, QMessageBox
+
+SCRIPT_DIRECTORY = 'd:\\photospy' #os.path.dirname(os.path.abspath(__file__))
+
 _PATH1_ = 'F:\\DCIM\\100D5300'
 _PATH2_ = 'd:\\photos_nikon'
 _PATH3_ = 'd:\\google drive\\photos_nikon'
@@ -53,13 +65,17 @@ class ImageFilePair:
         self.right = key
         self.rightfile = file
 
-def main():
-    if raw_input('copy from sd card? y or n') == 'y':
+def main2():
+    query1 = False #raw_input('copy from sd card? y or n') == 'y'
+    query2 = True #raw_input('copy from photos_nikon to google drive? y or n') == 'y'
+    query3 = True #raw_input('sync edits from photos_nikon to google drive? y or n') == 'y'
+
+    if query1:
         for file in os.listdir(_PATH1_):
             transitingFile = TransitingFile(os.path.join(_PATH1_, file))
             directory = os.path.join(_PATH2_, transitingFile.timestring[:8])
             transitingFile.copyTo(directory)
-    if raw_input('copy from photos_nikon to google drive? y or n') == 'y':
+    if query2:
         for root, dirs, files in os.walk(_PATH2_):
             for file in files:
                 if file[-3:] != 'JPG': # only do jpg files
@@ -79,7 +95,7 @@ def main():
                     image.resize(1200)
                     image.write(newImageFilePath)
                     image.close()
-    if raw_input('sync edits from photos_nikon to google drive? y or n') == 'y':
+    if query3:
         ImageFilePairs = []
         for root, dirs, files in os.walk(_PATH2_):
             for file in files:
@@ -107,4 +123,38 @@ def main():
                     image.resize(1200)
                     image.write(ifp.rightfile)
                     image.close()
-main()
+
+
+class UiLoader(QUiLoader):
+    def __init__(self, baseinstance):
+        QUiLoader.__init__(self, baseinstance)
+        self.baseinstance = baseinstance
+
+    def createWidget(self, class_name, parent=None, name=''):
+        if parent is None and self.baseinstance:
+            return self.baseinstance
+        else:
+            widget = QUiLoader.createWidget(self, class_name, parent, name)
+            if self.baseinstance:
+                setattr(self.baseinstance, name, widget)
+            return widget
+
+def loadUi(uifile, baseinstance=None):
+    loader = UiLoader(baseinstance)
+    widget = loader.load(uifile)
+    QMetaObject.connectSlotsByName(widget)
+    return widget
+
+class MainWindow(QMainWindow):
+    def __init__(self, parent=None):
+        QMainWindow.__init__(self, parent)
+        loadUi(os.path.join(SCRIPT_DIRECTORY, 'photospy.ui'), self)
+
+def main():
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    app.exec_()
+
+if __name__ == '__main__':
+    main()
