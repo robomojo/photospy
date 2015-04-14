@@ -15,7 +15,7 @@ from PySide.QtUiTools import QUiLoader
 from PySide.QtGui import QApplication, QMainWindow, QMessageBox
 
 SCRIPT_DIRECTORY = 'd:\\photospy' #os.path.dirname(os.path.abspath(__file__))
-
+UI_FILE = os.path.join(SCRIPT_DIRECTORY, 'photospy.ui')
 _PATH1_ = 'F:\\DCIM\\100D5300'
 _PATH2_ = 'd:\\photos_nikon'
 _PATH3_ = 'd:\\google drive\\photos_nikon'
@@ -139,22 +139,31 @@ class UiLoader(QUiLoader):
                 setattr(self.baseinstance, name, widget)
             return widget
 
-def loadUi(uifile, baseinstance=None):
-    loader = UiLoader(baseinstance)
-    widget = loader.load(uifile)
-    QMetaObject.connectSlotsByName(widget)
-    return widget
 
 class MainWindow(QMainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, uifile, parent=None):
         QMainWindow.__init__(self, parent)
-        loadUi(os.path.join(SCRIPT_DIRECTORY, 'photospy.ui'), self)
+        self.ui = self.loadUi(uifile, self)
+    def loadUi(self, uifile, baseinstance=None):
+        loader = UiLoader(baseinstance)
+        widget = loader.load(uifile)
+        QMetaObject.connectSlotsByName(widget)
+        return widget
+
+class App:
+    def __init__(self):
+        self.app = QApplication(sys.argv)
+        self.window = MainWindow(UI_FILE)
+        self.ui = self.window.ui
+        self.output = self.ui.findChild(PySide.QtGui.QPlainTextEdit, 'output')
+        self.window.show()
+    def outputText(self, text):
+        self.output.appendPlainText(text)
 
 def main():
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    app.exec_()
+    app = App()
+    app.outputText('Started')
+    app.app.exec_()
 
 if __name__ == '__main__':
     main()
