@@ -301,13 +301,12 @@
      </spacer>
     </item>
     <item>
-     <widget class="QPlainTextEdit" name="plainTextEdit">
+     <widget class="QPlainTextEdit" name="output">
       <property name="readOnly">
        <bool>true</bool>
       </property>
       <property name="plainText">
-       <string>text text text text
-</string>
+       <string/>
       </property>
      </widget>
     </item>
