@@ -70,59 +70,6 @@ def main2():
     query2 = True #raw_input('copy from photos_nikon to google drive? y or n') == 'y'
     query3 = True #raw_input('sync edits from photos_nikon to google drive? y or n') == 'y'
 
-    if query1:
-        for file in os.listdir(_PATH1_):
-            transitingFile = TransitingFile(os.path.join(_PATH1_, file))
-            directory = os.path.join(_PATH2_, transitingFile.timestring[:8])
-            transitingFile.copyTo(directory)
-    if query2:
-        for root, dirs, files in os.walk(_PATH2_):
-            for file in files:
-                if file[-3:] != 'JPG': # only do jpg files
-                    continue
-                YYYYMM = os.path.split(root)[-1][:6] # expecting YYYYMM
-                YYYYMMDD = os.path.split(root)[-1][:8] # expecting YYYYMMDD
-                directory = os.path.join(_PATH3_, YYYYMM) 
-                if not (os.path.exists(directory)):
-                    print 'main mkdir:', directory
-                    os.makedirs(directory)
-                newImageFilePath = os.path.join(directory, YYYYMMDD+'_'+file)
-                if not (os.path.exists(newImageFilePath)):
-                    # ImageFile should just open, resize & save as.
-                    existingImageFilePath = os.path.join(root, file)
-                    image = ImageFile(existingImageFilePath)
-                    image.open()
-                    image.resize(1200)
-                    image.write(newImageFilePath)
-                    image.close()
-    if query3:
-        ImageFilePairs = []
-        for root, dirs, files in os.walk(_PATH2_):
-            for file in files:
-                if file[-3:] != 'JPG': # only do jpg files
-                    continue
-                YYYYMMDD = os.path.split(root)[-1][:8] # expecting YYYYMMDD
-                ifp = ImageFilePair()
-                ifp.left = YYYYMMDD+'_'+file
-                ifp.leftfile = os.path.join(root, file)
-                ImageFilePairs.append(ifp)
-        for root, dirs, files in os.walk(_PATH3_):
-            for file in files:
-                if file[-3:] != 'JPG': # only do jpg files
-                    continue
-                match = next((x for x in ImageFilePairs if x.left == file), None)
-                if match:
-                    match.right = file
-                    match.rightfile = os.path.join(root, file)
-        for ifp in ImageFilePairs:
-            if ifp.left and ifp.right:
-                if os.path.getmtime(ifp.leftfile) > os.path.getmtime(ifp.rightfile):
-                    #TransitingFile(ifp.leftfile).write(ifp.rightfile)
-                    image = ImageFile(ifp.leftfile)
-                    image.open()
-                    image.resize(1200)
-                    image.write(ifp.rightfile)
-                    image.close()
 
 
 class UiLoader(QUiLoader):
@@ -139,7 +86,6 @@ class UiLoader(QUiLoader):
                 setattr(self.baseinstance, name, widget)
             return widget
 
-
 class MainWindow(QMainWindow):
     def __init__(self, uifile, parent=None):
         QMainWindow.__init__(self, parent)
@@ -155,10 +101,79 @@ class App:
         self.app = QApplication(sys.argv)
         self.window = MainWindow(UI_FILE)
         self.ui = self.window.ui
+        # ui members
         self.output = self.ui.findChild(PySide.QtGui.QPlainTextEdit, 'output')
+        self.cameradir_textedit = self.ui.findChild(PySide.QtGui.QPlainTextEdit, 'cameradir')
+        self.harddrivedir_textedit = self.ui.findChild(PySide.QtGui.QPlainTextEdit, 'harddrivedir')
+        self.websyncdir_textedit = self.ui.findChild(PySide.QtGui.QPlainTextEdit, 'websyncdir')
+        self.start_btn = self.ui.findChild(PySide.QtGui.QPushButton, 'start')
+        self.stop_btn = self.ui.findChild(PySide.QtGui.QPushButton, 'stop')
+        self.progressbar = self.ui.findChild(PySide.QtGui.QProgressBar, 'progressBar')
+        self.copy_camera_to_hdd_tog = self.ui.findChild(PySide.QtGui.QCheckBox, 'copy_camera_to_hdd')
+        self.copy_hdd_to_websync_tog = self.ui.findChild(PySide.QtGui.QCheckBox, 'copy_hdd_to_websync')
+        self.sync_hdd_to_websync_tog = self.ui.findChild(PySide.QtGui.QCheckBox, 'sync_hdd_to_websync')
+        # ui buttons
+        #self.window.ui.start.click.connect(self.start)
+        #PySide.QtCore.QObject.connect(PySide.QtGui.QPushButton, 'start', PySide.QtCore.SIGNAL ('clicked()'), lambda: self.start())
+        
         self.window.show()
     def outputText(self, text):
         self.output.appendPlainText(text)
+
+    def start(self):
+        if self.copy_camera_to_hdd_tog.isChecked():
+            for file in os.listdir(_PATH1_):
+                transitingFile = TransitingFile(os.path.join(_PATH1_, file))
+                directory = os.path.join(_PATH2_, transitingFile.timestring[:8])
+                transitingFile.copyTo(directory)
+        if self.copy_hdd_to_websync_tog.isChecked():
+            for root, dirs, files in os.walk(_PATH2_):
+                for file in files:
+                    if file[-3:] != 'JPG': # only do jpg files
+                        continue
+                    YYYYMM = os.path.split(root)[-1][:6] # expecting YYYYMM
+                    YYYYMMDD = os.path.split(root)[-1][:8] # expecting YYYYMMDD
+                    directory = os.path.join(_PATH3_, YYYYMM) 
+                    if not (os.path.exists(directory)):
+                        self.outputText('main mkdir:'+directory)
+                        os.makedirs(directory)
+                    newImageFilePath = os.path.join(directory, YYYYMMDD+'_'+file)
+                    if not (os.path.exists(newImageFilePath)):
+                        # ImageFile should just open, resize & save as.
+                        existingImageFilePath = os.path.join(root, file)
+                        image = ImageFile(existingImageFilePath)
+                        image.open()
+                        image.resize(1200)
+                        image.write(newImageFilePath)
+                        image.close()
+            if self.sync_hdd_to_websync_tog.isChecked():
+                ImageFilePairs = []
+                for root, dirs, files in os.walk(_PATH2_):
+                    for file in files:
+                        if file[-3:] != 'JPG': # only do jpg files
+                            continue
+                        YYYYMMDD = os.path.split(root)[-1][:8] # expecting YYYYMMDD
+                        ifp = ImageFilePair()
+                        ifp.left = YYYYMMDD+'_'+file
+                        ifp.leftfile = os.path.join(root, file)
+                        ImageFilePairs.append(ifp)
+                for root, dirs, files in os.walk(_PATH3_):
+                    for file in files:
+                        if file[-3:] != 'JPG': # only do jpg files
+                            continue
+                        match = next((x for x in ImageFilePairs if x.left == file), None)
+                        if match:
+                            match.right = file
+                            match.rightfile = os.path.join(root, file)
+                for ifp in ImageFilePairs:
+                    if ifp.left and ifp.right:
+                        if os.path.getmtime(ifp.leftfile) > os.path.getmtime(ifp.rightfile):
+                            #TransitingFile(ifp.leftfile).write(ifp.rightfile)
+                            image = ImageFile(ifp.leftfile)
+                            image.open()
+                            image.resize(1200)
+                            image.write(ifp.rightfile)
+                            image.close()
 
 def main():
     app = App()
