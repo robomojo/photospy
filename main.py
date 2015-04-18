@@ -100,6 +100,7 @@ class App:
         print sender.text()
     def outputText(self, text):
         self.ui.output.appendPlainText(text)
+        self.ui.output.repaint()
 
     def start(self):
         self.outputText('starting.')
