@@ -2,19 +2,21 @@
 import os, time
 import shutil
 import datetime
+import sys
 # PILLOW MODULES
 from PIL import Image
+# PYSIDE MODULES
 import PySide
-import sys
-
-#from __future__ import (print_function, division, unicode_literals,
-#                        absolute_import)
-
 from PySide.QtCore import Slot, QMetaObject
 from PySide.QtUiTools import QUiLoader
 from PySide.QtGui import QApplication, QMainWindow, QMessageBox
 
-SCRIPT_DIRECTORY = 'd:\\photospy' #os.path.dirname(os.path.abspath(__file__))
+# determine if application is ascript file or frozen exe
+if getattr(sys, 'frozen', False):
+    SCRIPT_DIRECTORY = os.path.dirname(sys.executable)
+elif __file__:
+    SCRIPT_DIRECTORY = os.path.dirname(__file__)
+
 UI_FILE = os.path.join(SCRIPT_DIRECTORY, 'photospy.ui')
 _PATH1_ = 'F:\\DCIM\\100D5300'
 _PATH2_ = 'd:\\photos_nikon'
