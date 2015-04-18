@@ -52,7 +52,11 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
-          <widget class="QLineEdit" name="lineEdit_2"/>
+          <widget class="QLineEdit" name="cameradir">
+           <property name="text">
+            <string>F:\\DCIM\\100D5300</string>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QPushButton" name="pushButton_3">
@@ -73,7 +77,11 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
-          <widget class="QLineEdit" name="lineEdit"/>
+          <widget class="QLineEdit" name="harddrivedir">
+           <property name="text">
+            <string>d:\\photos_nikon</string>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QPushButton" name="pushButton_2">
@@ -94,7 +102,11 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
-          <widget class="QLineEdit" name="lineEdit_3"/>
+          <widget class="QLineEdit" name="websyncdir">
+           <property name="text">
+            <string>d:\\google drive\\photos_nikon</string>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QPushButton" name="pushButton">
@@ -133,7 +145,7 @@
         <number>3</number>
        </property>
        <item>
-        <widget class="QCheckBox" name="checkBox_5">
+        <widget class="QCheckBox" name="do_resize_for_web_sync">
          <property name="text">
           <string>Resize Web Sync verison</string>
          </property>
@@ -173,7 +185,7 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QSpinBox" name="spinBox">
+           <widget class="QSpinBox" name="web_sync_size">
             <property name="minimumSize">
              <size>
               <width>60</width>
@@ -221,21 +233,21 @@
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="checkBox">
+        <widget class="QCheckBox" name="copy_camera_to_hdd">
          <property name="text">
           <string>Copy from Camera SD to Hard Drive</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="checkBox_2">
+        <widget class="QCheckBox" name="copy_hdd_to_websync">
          <property name="text">
           <string>Copy from Hard Drive to Web Sync</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="checkBox_3">
+        <widget class="QCheckBox" name="sync_hdd_to_websync">
          <property name="text">
           <string>Sync changes from Hard Drive to Web Sync</string>
          </property>
@@ -252,7 +264,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="pushButton_4">
+     <widget class="QPushButton" name="start">
       <property name="minimumSize">
        <size>
         <width>0</width>
@@ -278,7 +290,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_5">
+        <widget class="QPushButton" name="stop">
          <property name="text">
           <string>Stop</string>
          </property>
@@ -345,7 +357,7 @@
  <resources/>
  <connections>
   <connection>
-   <sender>checkBox_5</sender>
+   <sender>do_resize_for_web_sync</sender>
    <signal>toggled(bool)</signal>
    <receiver>frame</receiver>
    <slot>setEnabled(bool)</slot>
