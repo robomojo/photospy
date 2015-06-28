@@ -4,9 +4,10 @@ import shutil
 import datetime
 import sys
 import ConfigParser
+import warnings
 # PILLOW MODULES
 from PIL import Image
-
+import ipdb; ipdb.set_trace(frame=None)
 # determine if application is ascript file or frozen exe
 if getattr(sys, 'frozen', False):
     SCRIPT_DIRECTORY = os.path.dirname(sys.executable)
@@ -44,8 +45,11 @@ class ImageFile:
         self.image = self.image.resize((basewidth, hsize), Image.ANTIALIAS)
         return 'ImageFile resized'
     def write (self, path):
-        exif = self.image.info['exif']
-        self.image.save(path, exif=exif)
+        info = self.image.info
+        if 'exif' in info.keys():
+            self.image.save(path, exif=info['exif'])
+        else:
+            self.image.save(path)
         return 'ImageFile writing: '+path
     def close (self):
         del self.image
@@ -77,7 +81,7 @@ class App:
             print('starting copy from hard drive to web sync')
             for root, dirs, files in os.walk(self.args.directoryHdd):
                 for file in files:
-                    if file[-3:] != 'JPG': # only do jpg files
+                    if file[-3:].upper() != 'JPG': # only do jpg files
                         continue
                     YYYYMM = os.path.split(root)[-1][:6] # expecting YYYYMM
                     YYYYMMDD = os.path.split(root)[-1][:8] # expecting YYYYMMDD
@@ -100,7 +104,7 @@ class App:
             ImageFilePairs = []
             for root, dirs, files in os.walk(self.args.directoryHdd):
                 for file in files:
-                    if file[-3:] != 'JPG': # only do jpg files
+                    if file[-3:].upper() != 'JPG': # only do jpg files
                         continue
                     YYYYMMDD = os.path.split(root)[-1][:8] # expecting YYYYMMDD
                     ifp = ImageFilePair()
@@ -109,7 +113,7 @@ class App:
                     ImageFilePairs.append(ifp)
             for root, dirs, files in os.walk(self.args.directoryWebSync):
                 for file in files:
-                    if file[-3:] != 'JPG': # only do jpg files
+                    if file[-3:].upper() != 'JPG': # only do jpg files
                         continue
                     print(file)
                     match = next((x for x in ImageFilePairs if x.left == file), None)
